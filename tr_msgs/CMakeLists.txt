@@ -11,6 +11,12 @@ add_message_files(
   MotorPayload.msg
 )
 
+add_service_files(
+  DIRECTORY srv
+  FILES
+  GetBattery.srv
+)
+
 generate_messages()
 
 catkin_package(
