@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>tr_shield_bridge</name>
+  <version>0.0.0</version>
+  <description>The tr_shield_bridge package</description>
+
+  <maintainer email="pi@todo.todo">pi</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>tr_msgs</exec_depend>
+
+  <exec_depend>python-serial</exec_depend>
+
+</package>
