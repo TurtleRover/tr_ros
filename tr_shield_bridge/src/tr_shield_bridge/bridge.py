@@ -1,9 +1,11 @@
 import rospy
+from tr_msgs.msg import MotorPayload
+from tr_msgs.srv import GetBattery, GetBatteryResponse
+
+import struct
 
 import frame
 from uart import Uart
-
-from tr_msgs.msg import MotorPayload
 
 class Bridge():
     def __init__(self):
@@ -13,9 +15,21 @@ class Bridge():
         self.motor_sub = rospy.Subscriber(
             "~motors", 
             MotorPayload, 
-            self.callback_motors
+            self.setMotors
         )
 
-    def callback_motors(self, data):
+        self.battery_srv = rospy.Service(
+            "~get_battery",
+            GetBattery,
+            self.getBattery
+        )
+
+    def setMotors(self, data):
         f = frame.motors(data.payload)
         self.uart.send(f)
+
+    def getBattery(self, data):
+        self.uart.send(frame.battery())
+        status = self.uart.serial.read(1)
+        battery_status = struct.unpack(">B", status)[0]
+        return GetBatteryResponse(battery_status)
