@@ -11,7 +11,7 @@ class Bridge():
         self.uart.connect()
 
         self.motor_sub = rospy.Subscriber(
-            "/tr_shield_bridge/motors", 
+            "~motors", 
             MotorPayload, 
             self.callback_motors
         )

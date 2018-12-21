@@ -11,13 +11,13 @@ class Driver():
         self.max_speed_angular = rospy.get_param("max_speed_angular", 2.0)
 
         self.cmd_sub = rospy.Subscriber(
-            "/cmd_vel",
+            "cmd_vel",
             TwistStamped, 
             self.callback_cmd
         )
 
         self.motor_pub = rospy.Publisher(
-            "/tr_shield_bridge/motors", 
+            "tr_shield_bridge/motors", 
             MotorPayload, 
             queue_size=1
         )
