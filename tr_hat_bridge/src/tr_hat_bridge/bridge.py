@@ -5,13 +5,16 @@ from tr_hat_msgs.srv import GetBattery, GetBatteryResponse
 import struct
 
 import frame
-from uart import Uart
+from serial_comm import SerialComm
 
 
 class Bridge():
     def __init__(self):
-        self.uart = Uart()
-        self.uart.connect()
+
+        serial_device = rospy.get_param("~device", "/dev/ttyAMA0")
+        
+        self.comm = SerialComm(serial_device)
+        self.comm.connect()
 
         self.motor_sub = rospy.Subscriber(
             "~motors",
@@ -27,10 +30,10 @@ class Bridge():
 
     def setMotors(self, data):
         f = frame.motors(data.payload)
-        self.uart.send(f)
+        self.comm.send(f)
 
     def getBattery(self, data):
-        self.uart.send(frame.battery())
-        status = self.uart.serial.read(1)
+        self.comm.send(frame.battery())
+        status = self.comm.serial.read(1)
         battery_status = struct.unpack(">B", status)[0]
         return GetBatteryResponse(battery_status)
