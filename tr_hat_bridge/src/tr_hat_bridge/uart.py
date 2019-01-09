@@ -20,7 +20,7 @@ class Uart():
             return 0
 
     def connect(self):
-        while self.serial is None:
+        while self.serial is None and not rospy.is_shutdown():
             rospy.loginfo("Waiting for serial device")
             for port in self.available_ports():
                 if self.port in port.name:

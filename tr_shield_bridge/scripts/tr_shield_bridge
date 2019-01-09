@@ -1,6 +1,0 @@
-#!/usr/bin/env python
-
-import tr_shield_bridge.main
-
-if __name__ == '__main__':
-    tr_shield_bridge.main.main()

@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import tr_hat_bridge.main
+
+if __name__ == '__main__':
+    tr_hat_bridge.main.main()

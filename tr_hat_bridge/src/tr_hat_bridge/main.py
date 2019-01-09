@@ -4,7 +4,7 @@ from bridge import Bridge
 
 def main():
 
-    rospy.init_node('tr_shield_bridge')
+    rospy.init_node('tr_hat_bridge')
 
     bridge = Bridge()
 

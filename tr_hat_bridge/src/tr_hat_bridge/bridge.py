@@ -1,6 +1,6 @@
 import rospy
-from tr_msgs.msg import MotorPayload
-from tr_msgs.srv import GetBattery, GetBatteryResponse
+from tr_hat_msgs.msg import MotorPayload
+from tr_hat_msgs.srv import GetBattery, GetBatteryResponse
 
 import struct
 

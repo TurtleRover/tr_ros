@@ -1,7 +1,7 @@
 import rospy
 from geometry_msgs.msg import TwistStamped
 
-from tr_msgs.msg import MotorPayload
+from tr_hat_msgs.msg import MotorPayload
 
 class Driver():
     def __init__(self):
@@ -17,7 +17,7 @@ class Driver():
         )
 
         self.motor_pub = rospy.Publisher(
-            "tr_shield_bridge/motors", 
+            "tr_hat_bridge/motors", 
             MotorPayload, 
             queue_size=1
         )
