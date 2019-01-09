@@ -3,22 +3,23 @@ from geometry_msgs.msg import TwistStamped
 
 from tr_hat_msgs.msg import MotorPayload
 
+
 class Driver():
     def __init__(self):
         self.seq = 0
-        self.payload = [0x00,0x00,0x00,0x00] # FL, FR, RL, RR
+        self.payload = [0x00, 0x00, 0x00, 0x00]  # FL, FR, RL, RR
         self.max_speed_linear = rospy.get_param("max_speed_linear", 0.7)
         self.max_speed_angular = rospy.get_param("max_speed_angular", 2.0)
 
         self.cmd_sub = rospy.Subscriber(
             "cmd_vel",
-            TwistStamped, 
+            TwistStamped,
             self.callback_cmd
         )
 
         self.motor_pub = rospy.Publisher(
-            "tr_hat_bridge/motors", 
-            MotorPayload, 
+            "tr_hat_bridge/motors",
+            MotorPayload,
             queue_size=1
         )
 

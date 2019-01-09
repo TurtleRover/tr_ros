@@ -7,5 +7,5 @@ catkin_python_setup()
 
 catkin_package()
 
-catkin_install_python(PROGRAMS scripts/tr_control
+catkin_install_python(PROGRAMS nodes/tr_control
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

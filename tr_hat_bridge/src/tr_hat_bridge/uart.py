@@ -3,7 +3,8 @@ import rospy
 import serial
 import serial.tools.list_ports
 
-class Uart():
+
+class Serial():
     def __init__(self):
         self.BAUD = 115200
         self.port = "AMA"
@@ -25,7 +26,7 @@ class Uart():
             for port in self.available_ports():
                 if self.port in port.name:
                     rospy.loginfo("Found device: %s %s",
-                        port.name, port.manufacturer)
+                                  port.name, port.manufacturer)
                     try:
                         self.serial = serial.Serial(
                             port.device, baudrate=self.BAUD)

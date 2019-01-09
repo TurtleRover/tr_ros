@@ -7,14 +7,15 @@ import struct
 import frame
 from uart import Uart
 
+
 class Bridge():
     def __init__(self):
         self.uart = Uart()
         self.uart.connect()
 
         self.motor_sub = rospy.Subscriber(
-            "~motors", 
-            MotorPayload, 
+            "~motors",
+            MotorPayload,
             self.setMotors
         )
 

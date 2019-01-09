@@ -8,6 +8,7 @@ CLUPI_ADDR = 0x42
 
 POSTFIX = [0x0D, 0x0A]
 
+
 def firmware_ver():
     command = bytearray()
     command.append(FIRMWARE_VER_PREFIX)
@@ -19,6 +20,7 @@ def firmware_ver():
     command.append(0x0A)
     return command
 
+
 def motors(payload):
     command = bytearray()
     command.append(MOTORS_PREFIX)
@@ -26,8 +28,8 @@ def motors(payload):
     command.extend(POSTFIX)
     return command
 
-#	Read battery voltage (actualy, not the voltage but ADC reading)
 
+# Read battery voltage (actualy, not the voltage but ADC reading)
 def battery():
     command = [0x30]
     command.append(0x00)
@@ -38,7 +40,8 @@ def battery():
     command.append(0x0A)
     return command
 
-#	Set servo values
+
+# Set servo values
 def gripper(payload):
     command = bytearray()
     command.append(GRIPPER_PREFIX)
@@ -49,7 +52,7 @@ def gripper(payload):
     return command
 
 
-#	Set servo values
+# Set servo values
 def manipulator(payload):
     command = bytearray()
     command.append(MANIPULATOR_PREFIX)
@@ -58,7 +61,8 @@ def manipulator(payload):
     command.append(0x0A)
     return command
 
-#   This frame is made specially for CLUPI
+
+# This frame is made specially for CLUPI
 def clupi(payload):
     print(payload)
     command = bytearray()

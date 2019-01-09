@@ -7,5 +7,5 @@ catkin_python_setup()
 
 catkin_package()
 
-catkin_install_python(PROGRAMS scripts/tr_hat_bridge
+catkin_install_python(PROGRAMS nodes/tr_hat_bridge
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
