@@ -15,6 +15,7 @@ add_service_files(
   DIRECTORY srv
   FILES
   GetBattery.srv
+  GetFirmwareVer.srv
 )
 
 generate_messages()
