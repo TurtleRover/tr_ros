@@ -1,62 +1,38 @@
-import rospy
-from geometry_msgs.msg import TwistStamped
-
-from tr_hat_msgs.msg import MotorPayload
 
 
-class Driver():
-    def __init__(self):
-        self.seq = 0
-        self.payload = [0x00, 0x00, 0x00, 0x00]  # FL, FR, RL, RR
-        self.max_speed_linear = rospy.get_param("max_speed_linear", 0.7)
-        self.max_speed_angular = rospy.get_param("max_speed_angular", 2.0)
+class DriverBase(object):
+    def __init__(self, wheel_radius=0.06, wheel_track=0.33):
+        self.wheel_speeds = [0.0, 0.0, 0.0, 0.0]
+        self.wheel_radius = wheel_radius
+        self.wheel_track = wheel_track
 
-        self.cmd_sub = rospy.Subscriber(
-            "cmd_vel",
-            TwistStamped,
-            self.callback_cmd
-        )
+    def set_motors(self, linear, angular):
+        raise NotImplementedError()
 
-        self.motor_pub = rospy.Publisher(
-            "tr_hat_bridge/motors",
-            MotorPayload,
-            queue_size=1
-        )
 
-    def callback_cmd(self, data):
-        if data.header.seq < self.seq:
-            return
+class DriverStraight(DriverBase):
 
-        self.seq = data.header.seq
-
-        linear = data.twist.linear.x
-        angular = data.twist.angular.z
+    def set_motors(self, linear, angular):
 
         if abs(linear) >= abs(angular):
 
-            speed_linear = min(abs(linear), self.max_speed_linear)
-            wheel_payload = int((speed_linear / self.max_speed_linear) * 0x7F)
+            wheel_speed = linear / self.wheel_radius
 
-            if linear < 0 and wheel_payload > 0:
-                wheel_payload += 0x7F
-
-            self.payload = [wheel_payload] * 4
+            self.wheel_speeds = [wheel_speed] * 4
 
         else:
 
-            speed_angular = min(abs(angular), self.max_speed_angular)
-            wheel_payload = int((speed_angular / self.max_speed_angular) * 0x7F)
+            wheel_left_speed = (-angular * (self.wheel_track / 2)) / self.wheel_radius
+            wheel_right_speed = (angular * (self.wheel_track / 2)) / self.wheel_radius
 
-            if wheel_payload == 0:
-                wheel_left_payload = wheel_right_payload = 0
-            elif angular > 0:
-                wheel_left_payload = wheel_payload + 0x7F
-                wheel_right_payload = wheel_payload
-            else:
-                wheel_left_payload = wheel_payload
-                wheel_right_payload = wheel_payload + 0x7F
+            self.wheel_speeds = [wheel_left_speed, wheel_right_speed] * 2
 
-            self.payload = [wheel_left_payload, wheel_right_payload] * 2
 
-    def send_payload(self):
-        self.motor_pub.publish(self.payload)
+class DriverDifferential(DriverBase):
+
+    def set_motors(self, linear, angular):
+
+        wheel_left_speed = (linear - angular * (self.wheel_track / 2)) / self.wheel_radius
+        wheel_right_speed = (linear + angular * (self.wheel_track / 2)) / self.wheel_radius
+
+        self.wheel_speeds = [wheel_left_speed, wheel_right_speed] * 2

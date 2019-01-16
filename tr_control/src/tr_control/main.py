@@ -1,5 +1,5 @@
 import rospy
-from driver import Driver
+from robot import Robot
 
 
 def main():
@@ -7,10 +7,10 @@ def main():
     rospy.init_node('tr_control')
 
     rate = rospy.Rate(10)
-    d = Driver()
+    r = Robot()
 
     while not rospy.is_shutdown():
-        d.send_payload()
+        r.send_payload()
         rate.sleep()
 
 
