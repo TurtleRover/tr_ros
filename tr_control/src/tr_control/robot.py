@@ -9,11 +9,11 @@ from controller import Controller
 
 class Robot():
     def __init__(self):
-        self.seq = 0
         self.wheel_radius = rospy.get_param("~wheel_radius", 0.06)
         self.wheel_track = rospy.get_param("~wheel_track", 0.33)
         self.max_wheel_speed = rospy.get_param("~max_wheel_speed", 6.0)
         self.differential_drive = rospy.get_param("~differential_drive", True)
+        self.input_timeout = rospy.get_param("~input_timeout", 0.2)
 
         if self.differential_drive:
             Driver = DriverDifferential
@@ -26,7 +26,8 @@ class Robot():
         )
 
         self.controller = Controller(
-            max_wheel_speed=self.max_wheel_speed
+            max_wheel_speed=self.max_wheel_speed,
+            input_timeout=self.input_timeout
         )
 
         self.cmd_sub = rospy.Subscriber(
@@ -43,11 +44,6 @@ class Robot():
         )
 
     def callback_cmd(self, data):
-        if data.header.seq < self.seq:
-            return
-
-        self.seq = data.header.seq
-
         linear = data.twist.linear.x
         angular = data.twist.angular.z
 
