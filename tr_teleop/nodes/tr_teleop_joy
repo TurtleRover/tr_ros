@@ -7,24 +7,10 @@ from sensor_msgs.msg import Joy
 
 rospy.init_node("tr_teleop_joy")
 
-speed_linear = 0.0
-speed_angular = 0.0
-
 axis_linear = rospy.get_param("~axis_linear", 1)
 axis_angular = rospy.get_param("~axis_angular", 3)
 scale_linear = rospy.get_param("~scale_linear", 0.4)
 scale_angular = rospy.get_param("~scale_angular", 3.0)
-
-
-def joy_callback(data):
-    global speed_linear, speed_angular
-    value_linear = data.axes[axis_linear]
-    value_angular = data.axes[axis_angular]
-    speed_linear = value_linear * scale_linear
-    speed_angular = value_angular * scale_angular
-
-
-rospy.Subscriber("joy", Joy, joy_callback)
 
 cmd_pub = rospy.Publisher(
     "cmd_vel",
@@ -32,16 +18,21 @@ cmd_pub = rospy.Publisher(
     queue_size=1
 )
 
-seq = 0
-rate = rospy.Rate(30)
 
-while not rospy.is_shutdown():
+def joy_callback(joy):
+    value_linear = joy.axes[axis_linear]
+    value_angular = joy.axes[axis_angular]
+    speed_linear = value_linear * scale_linear
+    speed_angular = value_angular * scale_angular
 
     cmd = TwistStamped()
-    cmd.header.seq = seq
-    cmd.header.stamp = rospy.get_rostime()
+    cmd.header = joy.header
     cmd.twist.linear.x = speed_linear
     cmd.twist.angular.z = speed_angular
+
     cmd_pub.publish(cmd)
 
-    rate.sleep()
+
+rospy.Subscriber("joy", Joy, joy_callback)
+
+rospy.spin()

@@ -1,11 +1,12 @@
 <launch>
   <node name="joy_node" pkg="joy" type="joy_node">
     <param name="dev" value="/dev/input/js0"/>
+    <param name="coalesce_interval" value="0.02"/>
+    <param name="autorepeat_rate" value="30.0"/>
   </node>
 
   <node name="tr_teleop_joy" pkg="tr_teleop" type="tr_teleop_joy">
-    <param name="axis_linear" value="1"/>
-    <param name="axis_angular" value="3"/>
+    <rosparam command="load" file="$(find tr_teleop)/config/joy_mapping.yaml"/>
     <param name="scale_linear" value="0.4"/>
     <param name="scale_angular" value="2.0"/>
   </node>

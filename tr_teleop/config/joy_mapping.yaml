@@ -1,0 +1,3 @@
+# Joystick mapping for tr_teleop_joy node
+axis_linear: 1
+axis_angular: 3
