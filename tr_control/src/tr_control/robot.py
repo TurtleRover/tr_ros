@@ -14,6 +14,7 @@ class Robot():
         self.max_wheel_speed = rospy.get_param("~max_wheel_speed", 6.0)
         self.differential_drive = rospy.get_param("~differential_drive", True)
         self.input_timeout = rospy.get_param("~input_timeout", 0.5)
+        self.timestamp_check = rospy.get_param("~timestamp_check", 0.0)
 
         if self.differential_drive:
             Driver = DriverDifferential
@@ -44,6 +45,17 @@ class Robot():
         )
 
     def callback_cmd(self, data):
+        if self.timestamp_check > 0:
+            diff_sec = (rospy.get_rostime() - data.header.stamp).to_sec()
+            if diff_sec < 0.0:
+                rospy.logerr("Received command from the future! Make sure "
+                             "the time is synchronized or disable checking")
+                return
+            if diff_sec > self.timestamp_check:
+                rospy.logwarn(("Received a velocity command that is {0} seconds "
+                               "in the past. Ignoring").format(diff_sec))
+                return
+
         linear = data.twist.linear.x
         angular = data.twist.angular.z
 

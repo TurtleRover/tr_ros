@@ -40,6 +40,10 @@ This node takes velocity commands as Twist messages and communicates with [tr_ha
 
     Input timeout in seconds. The controller will stop the motors if it doesn't receive a command for a specified time. If set to 0, the controller won't check for a timeout.
 
+* **`~timestamp_check`** (`float`, default: `0.0`)
+
+    Velocity commands with timestamps that are older than this value will be ignored. Requires synchronized time between Rover and host machine. If set to 0, timestamp checking will be disabled.
+
 
 [tr_hat_bridge]: https://github.com/TurtleRover/tr_ros/tree/master/tr_hat_bridge
 [geometry_msgs/TwistStamped]: http://docs.ros.org/api/geometry_msgs/html/msg/TwistStamped.html
