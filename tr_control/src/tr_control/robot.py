@@ -13,7 +13,7 @@ class Robot():
         self.wheel_track = rospy.get_param("~wheel_track", 0.33)
         self.max_wheel_speed = rospy.get_param("~max_wheel_speed", 6.0)
         self.differential_drive = rospy.get_param("~differential_drive", True)
-        self.input_timeout = rospy.get_param("~input_timeout", 0.2)
+        self.input_timeout = rospy.get_param("~input_timeout", 0.5)
 
         if self.differential_drive:
             Driver = DriverDifferential
