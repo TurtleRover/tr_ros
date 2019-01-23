@@ -1,0 +1,153 @@
+#!/usr/bin/env python
+
+import rospy
+
+from geometry_msgs.msg import TwistStamped
+
+from threading import Thread
+
+import sys
+import select
+import termios
+import tty
+
+msg = """
+Control Your Turtle Rover!
+---------------------------
+Moving around:
+   u    i    o
+   j    k    l
+   m    ,    .
+q/z : increase/decrease max speeds by 10%
+w/x : increase/decrease only linear speed by 10%
+e/c : increase/decrease only angular speed by 10%
+space key, k : force stop
+anything else : stop smoothly
+CTRL-C to quit
+"""
+
+moveBindings = {
+    'i': (1, 0),
+    'o': (1, -1),
+    'j': (0, 1),
+    'l': (0, -1),
+    'u': (1, 1),
+    ',': (-1, 0),
+    '.': (-1, 1),
+    'm': (-1, -1)
+}
+
+speedBindings = {
+    'q': (1.1, 1.1),
+    'z': (.9, .9),
+    'w': (1.1, 1),
+    'x': (.9, 1),
+    'e': (1, 1.1),
+    'c': (1, .9)
+}
+
+
+def get_key():
+    tty.setraw(sys.stdin.fileno())
+    rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
+    if rlist:
+        key = sys.stdin.read(1)
+    else:
+        key = ''
+
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+    return key
+
+
+def vels(linear, angular):
+    return "current speed:\tlinear %s\tangular %s " % (linear, angular)
+
+
+settings = termios.tcgetattr(sys.stdin)
+
+rospy.init_node('tr_teleop_key')
+
+pub = rospy.Publisher(
+    'cmd_vel',
+    TwistStamped,
+    queue_size=5
+)
+
+
+class ControlLoop(Thread):
+    def __init__(self):
+        super(ControlLoop, self).__init__()
+        self.target_linear = 0.0
+        self.target_angular = 0.0
+        self.current_linear = 0.0
+        self.current_angular = 0.0
+        self.update_rate = 30.0
+        self.last_update = rospy.get_rostime()
+
+    def run(self):
+        rate = rospy.Rate(self.update_rate)
+        while not rospy.is_shutdown():
+            if (rospy.get_rostime() - self.last_update).to_sec() > key_timeout:
+                self.set_speeds(0.0, 0.0)
+
+            if self.current_linear < self.target_linear:
+                self.current_linear += accel_linear / self.update_rate
+                self.current_linear = min(self.current_linear, self.target_linear)
+            elif self.current_linear > self.target_linear:
+                self.current_linear -= accel_linear / self.update_rate
+                self.current_linear = max(self.current_linear, self.target_linear)
+
+            if self.current_angular < self.target_angular:
+                self.current_angular += accel_angular / self.update_rate
+                self.current_angular = min(self.current_angular, self.target_angular)
+            elif self.current_angular > self.target_angular:
+                self.current_angular -= accel_angular / self.update_rate
+                self.current_angular = max(self.current_angular, self.target_angular)
+
+            cmd = TwistStamped()
+            cmd.header.stamp = rospy.get_rostime()
+            cmd.twist.linear.x = self.current_linear
+            cmd.twist.angular.z = self.current_angular
+            pub.publish(cmd)
+
+            rate.sleep()
+
+    def set_speeds(self, linear, angular):
+        self.target_linear = linear
+        self.target_angular = angular
+        self.last_update = rospy.get_rostime()
+
+    def stop_motors(self):
+        self.target_linear = self.current_linear = 0.0
+        self.target_angular = self.current_angular = 0.0
+
+
+speed_linear = rospy.get_param("~speed_linear", 0.4)
+speed_angular = rospy.get_param("~speed_angular", 3.0)
+accel_linear = rospy.get_param("~accel_linear", 0.8)
+accel_angular = rospy.get_param("~accel_angular", 6.0)
+key_timeout = rospy.get_param("~key_timeout", 0.3)
+
+control = ControlLoop()
+control.start()
+
+print(msg)
+print(vels(speed_linear, speed_angular))
+while not rospy.is_shutdown():
+    key = get_key()
+    if key in moveBindings.keys():
+        x = moveBindings[key][0]
+        th = moveBindings[key][1]
+        linear = speed_linear * x
+        angular = speed_angular * th
+        control.set_speeds(linear, angular)
+    elif key in speedBindings.keys():
+        speed_linear *= speedBindings[key][0]
+        speed_angular *= speedBindings[key][1]
+        print(vels(speed_linear, speed_angular))
+    elif key == ' ' or key == 'k':
+        control.stop_motors()
+    elif key == '\x03':
+        rospy.signal_shutdown("keyboard interrupt")
+
+control.join()
