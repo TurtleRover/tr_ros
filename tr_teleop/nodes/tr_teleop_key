@@ -87,8 +87,9 @@ class ControlLoop(Thread):
     def run(self):
         rate = rospy.Rate(self.update_rate)
         while not rospy.is_shutdown():
-            if (rospy.get_rostime() - self.last_update).to_sec() > key_timeout:
-                self.set_speeds(0.0, 0.0)
+            if key_timeout > 0.0:
+                if (rospy.get_rostime() - self.last_update).to_sec() > key_timeout:
+                    self.set_speeds(0.0, 0.0)
 
             if self.current_linear < self.target_linear:
                 self.current_linear += accel_linear / self.update_rate
