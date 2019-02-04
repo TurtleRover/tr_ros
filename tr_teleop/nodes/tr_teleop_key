@@ -68,7 +68,7 @@ settings = termios.tcgetattr(sys.stdin)
 rospy.init_node('tr_teleop_key')
 
 pub = rospy.Publisher(
-    'cmd_vel',
+    'cmd_vel_stamped',
     TwistStamped,
     queue_size=5
 )

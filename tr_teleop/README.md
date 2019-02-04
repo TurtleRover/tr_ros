@@ -8,7 +8,7 @@ This node allows teleoperation using keyboard input
 
 #### Published Topics
 
-* **`cmd_vel`** ([geometry_msgs/TwistStamped])
+* **`cmd_vel_stamped`** ([geometry_msgs/TwistStamped])
 
     velocity command
 
@@ -45,7 +45,7 @@ This node allows teleoperation using joystick input. It receives joystick input 
 
 #### Published Topics
 
-* **`cmd_vel`** ([geometry_msgs/TwistStamped])
+* **`cmd_vel_stamped`** ([geometry_msgs/TwistStamped])
 
     velocity command
 

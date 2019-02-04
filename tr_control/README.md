@@ -8,9 +8,14 @@ This node takes velocity commands as Twist messages and communicates with [tr_ha
 
 #### Subscribed Topics
 
-* **`cmd_vel`** ([geometry_msgs/TwistStamped])
+* **`cmd_vel`** ([geometry_msgs/Twist])
 
     Target velocity of the Rover. Only linear.x (m/s) and angular.z (r/s) are used.
+
+* **`cmd_vel_stamped`** ([geometry_msgs/TwistStamped])
+
+    Stamped velocity commands. Should not be published with `cmd_vel` at the same time
+
 
 #### Published Topics
 
@@ -42,9 +47,11 @@ This node takes velocity commands as Twist messages and communicates with [tr_ha
 
 * **`~timestamp_check`** (`float`, default: `0.0`)
 
-    Velocity commands with timestamps that are older than this value will be ignored. Requires synchronized time between Rover and host machine. If set to 0, timestamp checking will be disabled.
+    Velocity commands with timestamps that are older than this value will be ignored. Only affects `cmd_vel_stamped` messages. Requires synchronized time between Rover and host machine.  
+    If set to 0, timestamp checking will be disabled.
 
 
 [tr_hat_bridge]: https://github.com/TurtleRover/tr_ros/tree/master/tr_hat_bridge
+[geometry_msgs/Twist]: http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html
 [geometry_msgs/TwistStamped]: http://docs.ros.org/api/geometry_msgs/html/msg/TwistStamped.html
 [tr_hat_msgs/MotorPayload]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/msg/MotorPayload.msg

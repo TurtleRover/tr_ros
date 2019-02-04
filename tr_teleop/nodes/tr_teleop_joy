@@ -13,7 +13,7 @@ scale_linear = rospy.get_param("~scale_linear", 0.4)
 scale_angular = rospy.get_param("~scale_angular", 3.0)
 
 cmd_pub = rospy.Publisher(
-    "cmd_vel",
+    "cmd_vel_stamped",
     TwistStamped,
     queue_size=1
 )

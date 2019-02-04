@@ -1,5 +1,5 @@
 import rospy
-from geometry_msgs.msg import TwistStamped
+from geometry_msgs.msg import Twist, TwistStamped
 
 from tr_hat_msgs.msg import MotorPayload
 
@@ -33,8 +33,15 @@ class Robot():
 
         self.cmd_sub = rospy.Subscriber(
             "cmd_vel",
-            TwistStamped,
+            Twist,
             self.callback_cmd,
+            queue_size=1
+        )
+
+        self.cmd_stamped_sub = rospy.Subscriber(
+            "cmd_vel_stamped",
+            TwistStamped,
+            self.callback_cmd_stamped,
             queue_size=1
         )
 
@@ -44,7 +51,14 @@ class Robot():
             queue_size=1
         )
 
-    def callback_cmd(self, data):
+    def callback_cmd(self, twist):
+        linear = twist.linear.x
+        angular = twist.angular.z
+
+        self.driver.set_motors(linear, angular)
+        self.controller.set_wheels(self.driver.wheel_speeds)
+
+    def callback_cmd_stamped(self, data):
         if self.timestamp_check > 0:
             diff_sec = (rospy.get_rostime() - data.header.stamp).to_sec()
             if diff_sec < 0.0:
@@ -56,11 +70,7 @@ class Robot():
                                "in the past. Ignoring").format(diff_sec))
                 return
 
-        linear = data.twist.linear.x
-        angular = data.twist.angular.z
-
-        self.driver.set_motors(linear, angular)
-        self.controller.set_wheels(self.driver.wheel_speeds)
+        self.callback_cmd(data.twist)
 
     def send_payload(self):
         self.motor_pub.publish(self.controller.payload)
