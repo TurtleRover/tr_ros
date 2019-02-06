@@ -17,7 +17,7 @@ Exposes ROS API for communication with Turtle Hat
 
 * **`~get_battery`** ([tr_hat_msgs/GetBattery])
 
-	Returns battery ADC reading
+	Returns battery voltage
 
 * **`~get_firmware_ver`** ([tr_hat_msgs/GetFirmwareVer])
 

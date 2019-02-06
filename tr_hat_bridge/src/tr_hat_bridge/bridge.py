@@ -47,15 +47,15 @@ class Bridge():
     def get_battery(self, data):
         with self.srv_lock:
             self.comm.send(frame.battery())
-            status = self.comm.serial.read(1)
+            status = self.comm.readline()
 
-        if not status:
+        if not status or not status.endswith("\r\n"):
             success = False
             rospy.logerr("Could not get battery status")
             battery_status = 0
         else:
             success = True
-            battery_status = struct.unpack(">B", status)[0]
+            battery_status = struct.unpack("<f", status[:4])[0]
 
         return GetBatteryResponse(success, battery_status)
 
@@ -64,10 +64,11 @@ class Bridge():
             self.comm.send(frame.firmware_ver())
             firmware_ver = self.comm.readline()
 
-        if not firmware_ver:
+        if not firmware_ver or not firmware_ver.endswith("\r\n"):
             success = False
             rospy.logerr("Could not get firmware version")
         else:
             success = True
+            firmware_ver = firmware_ver[:-2]
 
         return GetFirmwareVerResponse(success, firmware_ver)

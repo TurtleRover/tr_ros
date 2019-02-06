@@ -7,7 +7,7 @@ def main():
 
     rospy.init_node('tr_hat_bridge')
 
-    bridge = Bridge()
+    Bridge()
 
     rospy.spin()
 

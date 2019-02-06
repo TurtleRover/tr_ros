@@ -1,10 +1,6 @@
-MOTORS_PREFIX = 0x10  # Set all motors
-GRIPPER_PREFIX = 0x94
-MANIPULATOR_PREFIX = 0x84
-FIRMWARE_VER_PREFIX = 0x99
-
-CLUPI_PREFIX = 0x41
-CLUPI_ADDR = 0x42
+FIRMWARE_VER_PREFIX = 0x01
+MOTORS_PREFIX = 0x10
+BATTERY_PREFIX = 0x31
 
 POSTFIX = [0x0D, 0x0A]
 
@@ -12,12 +8,8 @@ POSTFIX = [0x0D, 0x0A]
 def firmware_ver():
     command = bytearray()
     command.append(FIRMWARE_VER_PREFIX)
-    command.append(0x00)
-    command.append(0x00)
-    command.append(0x00)
-    command.append(0x00)
-    command.append(0x0D)
-    command.append(0x0A)
+    command.extend([0x00, 0x00, 0x00, 0x00])
+    command.extend(POSTFIX)
     return command
 
 
@@ -29,46 +21,9 @@ def motors(payload):
     return command
 
 
-# Read battery voltage (actualy, not the voltage but ADC reading)
 def battery():
-    command = [0x30]
-    command.append(0x00)
-    command.append(0x00)
-    command.append(0x00)
-    command.append(0x00)
-    command.append(0x0D)
-    command.append(0x0A)
-    return command
-
-
-# Set servo values
-def gripper(payload):
     command = bytearray()
-    command.append(GRIPPER_PREFIX)
-    command.extend(payload)
-    command.append(0x00)
-    command.append(0x00)
+    command.append(BATTERY_PREFIX)
+    command.extend([0x00, 0x00, 0x00, 0x00])
     command.extend(POSTFIX)
-    return command
-
-
-# Set servo values
-def manipulator(payload):
-    command = bytearray()
-    command.append(MANIPULATOR_PREFIX)
-    command.extend(payload)
-    command.append(0x0D)
-    command.append(0x0A)
-    return command
-
-
-# This frame is made specially for CLUPI
-def clupi(payload):
-    print(payload)
-    command = bytearray()
-    command.append(CLUPI_PREFIX)
-    command.append(CLUPI_ADDR)
-    command.extend(payload)
-    command.append(0x0D)
-    command.append(0x0A)
     return command
