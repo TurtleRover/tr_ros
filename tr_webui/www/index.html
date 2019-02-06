@@ -6,24 +6,39 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <base href="tr_webui" target="_blank">
+    <base href="tr_webui/" target="_blank">
 
     <link rel="stylesheet" href="styles/bootstrap.min.css" />
+    <link rel="stylesheet" href="styles/bootstrap-slider.min.css" />
+    <link rel="stylesheet" href="styles/webui.css" />
     <link rel="icon" type="img/png" href="favicon.png">
   </head>
   <body class="bg-light">
-      
+
+
     <!-- SPEED -->
-    <div class="row">
-      <div class="col-md-4"></div>
-      <div class=" col-md-4">
-          <label for="robot-speed">
-              <strong>Robot speed</strong>
-          </label>
-          <input type="range" min="10" max="40" class="custom-range" id="robot-speed">
+    <div class="row no-gutters">
+      <div class="col-md-5"></div>
+      <div class="col-md-2">
+        <label for="robot-speed">
+            <strong>Linear speed (m/s)</strong>
+        </label>
+        <input id="lin-slider" type="text"/>
       </div>
-      <div class="col-md-4"></div>
+      <div class="col-md-5"></div>
     </div>
+  
+    <div class="row no-gutters">
+      <div class="col-md-5"></div>
+      <div class="col-md-2">
+        <label for="robot-speed">
+            <strong>Angular speed (r/s)</strong>
+        </label>
+        <input id="ang-slider" type="text"/>
+      </div>
+      <div class="col-md-5"></div>
+    </div>
+      
 
     <!-- JOYSTICK -->
     <div class="row my-4">
@@ -36,10 +51,8 @@
 
     <script src="scripts/jquery-3.3.1.slim.min.js"></script>
     <script src="scripts/bootstrap.min.js"></script>
-
+    <script src="scripts/bootstrap-slider.min.js"></script>
     <script src="scripts/roslib.min.js"></script>
-    <script src="scripts/eventemitter2.min.js"></script>
-    <script src="scripts/keyboardteleop.min.js"></script>
     <script src="scripts/nipplejs.js"></script>
     <script src="scripts/webui.js"></script>
   </body>
