@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 import rospy
-from tr_hat_msgs.msg import MotorPayload
+from tr_hat_msgs.msg import MotorPayload, ServoAngle
 from tr_hat_msgs.srv import (GetBattery, GetBatteryResponse,
                              GetFirmwareVer, GetFirmwareVerResponse)
 
@@ -20,12 +20,18 @@ class Bridge():
         self.comm = SerialComm(serial_device)
         self.comm.connect()
 
-        self.srv_lock = Lock()
+        self.lock = Lock()
 
         self.motor_sub = rospy.Subscriber(
             "~motors",
             MotorPayload,
             self.set_motors
+        )
+
+        self.servo_sub = rospy.Subscriber(
+            "~servo",
+            ServoAngle,
+            self.set_servo
         )
 
         self.battery_srv = rospy.Service(
@@ -41,15 +47,41 @@ class Bridge():
         )
 
     def set_motors(self, data):
-        f = frame.motors(data.payload)
-        self.comm.send(f)
-
-    def get_battery(self, data):
-        with self.srv_lock:
-            self.comm.send(frame.battery())
+        with self.lock:
+            self.comm.serial.flushInput()
+            f = frame.motors(data.payload)
+            self.comm.send(f)
             status = self.comm.readline()
 
-        if not status or not status.endswith("\r\n"):
+        if not status or not status == " OK \r\n":
+            rospy.logerr("Did not receive a valid response after motor command")
+
+    def set_servo(self, data):
+        if data.channel not in [1.2,3]:
+            rospy.logerr(("Wrong servo channel! Received {0}, "
+                          "expected 1, 2 or 3".format(data.channel)))
+            return
+
+        value = int((data.angle / 180.0) * 3450 + 1300)
+        duty = struct.pack(">H", value)
+        f = frame.servo(data.channel, duty)
+
+        with self.lock:
+            self.comm.serial.flushInput()
+            self.comm.send(f)
+            status = self.comm.readline()
+
+        if not status or not status == " OK \r\n":
+            rospy.logerr("Did not receive a valid response after servo command")
+
+    def get_battery(self, data):
+        with self.lock:
+            self.comm.serial.flushInput()
+            self.comm.send(frame.battery())
+            #status = self.comm.readline()
+            status = self.comm.serial.read(4)
+
+        if not status:  #or not status.endswith("\r\n"):
             success = False
             rospy.logerr("Could not get battery status")
             battery_status = 0
@@ -60,7 +92,8 @@ class Bridge():
         return GetBatteryResponse(success, battery_status)
 
     def get_firmware_ver(self, data):
-        with self.srv_lock:
+        with self.lock:
+            self.comm.serial.flushInput()
             self.comm.send(frame.firmware_ver())
             firmware_ver = self.comm.readline()
 

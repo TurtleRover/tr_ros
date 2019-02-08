@@ -9,6 +9,7 @@ add_message_files(
   DIRECTORY msg
   FILES
   MotorPayload.msg
+  ServoAngle.msg
 )
 
 add_service_files(
