@@ -19,7 +19,7 @@ This node takes velocity commands as Twist messages and communicates with [tr_ha
 
 #### Published Topics
 
-* **`tr_hat_bridge/motors`** ([tr_hat_msgs/MotorPayload])
+* **`tr_hat_bridge/motors`** ([tr_hat_msgs/MotorPower])
 
     Motor power values sent to Turtle Hat
 
@@ -54,4 +54,4 @@ This node takes velocity commands as Twist messages and communicates with [tr_ha
 [tr_hat_bridge]: https://github.com/TurtleRover/tr_ros/tree/master/tr_hat_bridge
 [geometry_msgs/Twist]: http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html
 [geometry_msgs/TwistStamped]: http://docs.ros.org/api/geometry_msgs/html/msg/TwistStamped.html
-[tr_hat_msgs/MotorPayload]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/msg/MotorPayload.msg
+[tr_hat_msgs/MotorPower]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/msg/MotorPower.msg

@@ -8,10 +8,9 @@ Exposes ROS API for communication with Turtle Hat
 
 #### Subscribed Topics
 
-* **`~motors`** ([tr_hat_msgs/MotorPayload])
+* **`~motors`** ([tr_hat_msgs/MotorPower])
 
-	Sends the motor payload values described by 8-bit integers.  
-	Values between 0-127 (0x00-0x7F) move the motors forward and values 128-255 (0x80-0xFF) move them backward
+	Sets motor power levels described by float values between -1.0 and 1.0
 
 #### Services
 
@@ -29,6 +28,6 @@ Exposes ROS API for communication with Turtle Hat
 
 	Serial device connected to Turtle Hat
 
-[tr_hat_msgs/MotorPayload]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/msg/MotorPayload.msg
+[tr_hat_msgs/MotorPower]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/msg/MotorPower.msg
 [tr_hat_msgs/GetBattery]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/srv/GetBattery.srv
 [tr_hat_msgs/GetFirmwareVer]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/srv/GetFirmwareVer.srv

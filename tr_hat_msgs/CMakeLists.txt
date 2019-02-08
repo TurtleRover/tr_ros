@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   DIRECTORY msg
   FILES
-  MotorPayload.msg
+  MotorPower.msg
   ServoAngle.msg
 )
 

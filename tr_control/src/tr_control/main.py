@@ -10,7 +10,7 @@ def main():
     r = Robot()
 
     while not rospy.is_shutdown():
-        r.send_payload()
+        r.publish_motors()
         rate.sleep()
 
 

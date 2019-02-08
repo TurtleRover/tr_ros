@@ -5,7 +5,7 @@ from threading import Thread, Event
 
 class Controller(object):
     def __init__(self, max_wheel_speed=6.0, input_timeout=0.2):
-        self.payload = [0, 0, 0, 0]  # RR, RL, FR, FL
+        self.power = [0, 0, 0, 0]  # RR, RL, FR, FL
         self.max_wheel_speed = max_wheel_speed
         self.check_input = input_timeout > 0.0
         self.input_timeout = rospy.Duration(input_timeout)
@@ -17,13 +17,6 @@ class Controller(object):
             self.check_input_thread.daemon = True
             self.check_input_thread.start()
 
-    @staticmethod
-    def convert_motor_power_to_payload(power):
-        value = int(round(power * 0x7F))
-        if value < 0:
-            value = -value + 0x7F
-        return value
-
     def check_input_loop(self):
         while not rospy.is_shutdown():
             self.input_received.wait()
@@ -33,14 +26,13 @@ class Controller(object):
 
             rospy.logwarn(("No input received for more than a specified timeout! "
                            "Stopping the motors"))
-            self.payload = [0, 0, 0, 0]
+            self.power = [0, 0, 0, 0]
             self.input_received.clear()
 
     def set_wheels(self, wheel_speeds):
         for i, wheel_speed in enumerate(wheel_speeds):
             wheel_speed = min(self.max_wheel_speed, max(-self.max_wheel_speed, wheel_speed))
-            motor_power = wheel_speed / self.max_wheel_speed
-            self.payload[i] = Controller.convert_motor_power_to_payload(motor_power)
+            self.power[i] = wheel_speed / self.max_wheel_speed
 
         if self.check_input:
             self.last_update = rospy.get_rostime()

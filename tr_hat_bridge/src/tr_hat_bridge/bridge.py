@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 import rospy
-from tr_hat_msgs.msg import MotorPayload, ServoAngle
+from tr_hat_msgs.msg import MotorPower, ServoAngle
 from tr_hat_msgs.srv import (GetBattery, GetBatteryResponse,
                              GetFirmwareVer, GetFirmwareVerResponse)
 
@@ -24,7 +24,7 @@ class Bridge():
 
         self.motor_sub = rospy.Subscriber(
             "~motors",
-            MotorPayload,
+            MotorPower,
             self.set_motors
         )
 
@@ -47,9 +47,17 @@ class Bridge():
         )
 
     def set_motors(self, data):
+        payload = []
+        for p in data.power:
+            p = max(min(p, 1.0), -1.0)
+            value = int(round(p * 0x7F))
+            if value < 0:
+                value = -value + 0x7F
+            payload.append(value)
+
         with self.lock:
             self.comm.serial.flushInput()
-            f = frame.motors(data.payload)
+            f = frame.motors(payload)
             self.comm.send(f)
             status = self.comm.readline()
 

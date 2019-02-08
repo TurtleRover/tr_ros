@@ -1,7 +1,7 @@
 import rospy
 from geometry_msgs.msg import Twist, TwistStamped
 
-from tr_hat_msgs.msg import MotorPayload
+from tr_hat_msgs.msg import MotorPower
 
 from driver import DriverStraight, DriverDifferential
 from controller import Controller
@@ -47,7 +47,7 @@ class Robot():
 
         self.motor_pub = rospy.Publisher(
             "tr_hat_bridge/motors",
-            MotorPayload,
+            MotorPower,
             queue_size=1
         )
 
@@ -72,5 +72,5 @@ class Robot():
 
         self.callback_cmd(data.twist)
 
-    def send_payload(self):
-        self.motor_pub.publish(self.controller.payload)
+    def publish_motors(self):
+        self.motor_pub.publish(self.controller.power)
