@@ -57,7 +57,7 @@ class Bridge():
             rospy.logerr("Did not receive a valid response after motor command")
 
     def set_servo(self, data):
-        if data.channel not in [1.2,3]:
+        if data.channel not in [1,2,3]:
             rospy.logerr(("Wrong servo channel! Received {0}, "
                           "expected 1, 2 or 3".format(data.channel)))
             return
