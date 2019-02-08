@@ -1,11 +1,34 @@
 var twist;
 var speedLinear;
 var speedAngular;
-var cmdVelPub;
 var manager;
 var ros;
+var firmwareVerClient;
+var batteryClient;
+var cmdVelPub;
+var servoPub;
+var servoAngles;
 
-function initVelocityPublisher() {
+function initROS() {
+
+    var robot_hostname = window.location.hostname;
+
+    ros = new ROSLIB.Ros({
+        url: "ws://" + robot_hostname + ":9090"
+    });
+
+    firmwareVerClient = new ROSLIB.Service({
+        ros: ros,
+        name: '/tr_hat_bridge/get_firmware_ver',
+        serviceType: 'tr_hat_msgs/GetFirmwareVer'
+    });
+
+    batteryClient = new ROSLIB.Service({
+        ros: ros,
+        name: '/tr_hat_bridge/get_battery',
+        serviceType: 'tr_hat_msgs/GetBattery'
+    });
+
     // Init message with zero values.
     twist = new ROSLIB.Message({
         linear: {
@@ -19,14 +42,22 @@ function initVelocityPublisher() {
             z: 0
         }
     });
-    // Init topic object
+
     cmdVelPub = new ROSLIB.Topic({
         ros: ros,
         name: '/cmd_vel',
         messageType: 'geometry_msgs/Twist'
     });
-    // Register publisher within ROS system
+
     cmdVelPub.advertise();
+
+    servoPub = new ROSLIB.Topic({
+        ros: ros,
+        name: '/tr_hat_bridge/servo',
+        messageType: 'tr_hat_msgs/ServoAngle'
+    });
+
+    servoPub.advertise();
 }
 
 function initTeleopKeyboard() {
@@ -93,7 +124,7 @@ function initSliders() {
     $('#lin-slider').slider({
         tooltip: 'show',
         min: 0,
-        max: 0.4,
+        max: 0.36,
         step: 0.01,
         value: 0.2
     });
@@ -105,35 +136,94 @@ function initSliders() {
     $('#ang-slider').slider({
         tooltip: 'show',
         min: 0,
-        max: 6.0,
+        max: 2.2,
         step: 0.1,
-        value: 3.0
+        value: 1.5
     });
     $('#ang-slider').on("slide", function(slideEvt) {
         speedAngular = slideEvt.value;
     });
-    speedAngular = 3.0
+    speedAngular = 1.5
+
+    servoAngles = [90,90,90];
+
+    $('#s1-slider').slider({
+        tooltip: 'show',
+        min: 0,
+        max: 180,
+        step: 1,
+        value: 90
+    });
+    $('#s1-slider').on("slide", function(slideEvt) {
+        servoAngles[0] = slideEvt.value;
+    });
+
+    $('#s2-slider').slider({
+        tooltip: 'show',
+        min: 0,
+        max: 180,
+        step: 1,
+        value: 90
+    });
+    $('#s2-slider').on("slide", function(slideEvt) {
+        servoAngles[1] = slideEvt.value;
+    });
+
+    $('#s3-slider').slider({
+        tooltip: 'show',
+        min: 0,
+        max: 180,
+        step: 1,
+        value: 90
+    });
+    $('#s3-slider').on("slide", function(slideEvt) {
+        servoAngles[2] = slideEvt.value;
+    });
 }
 
 
 function publishTwist() {
-    //console.log("twist " + twist.linear.x + " " + twist.angular.z)
     cmdVelPub.publish(twist)
 }
 
-window.onload = function () {
-    var robot_hostname = window.location.hostname;
-
-    // // Init handle for rosbridge_websocket
-    ros = new ROSLIB.Ros({
-        url: "ws://" + robot_hostname + ":9090"
+function publishServos() {
+    servoMsg = new ROSLIB.Message({
+        channel: 1,
+        angle: servoAngles[0]
     });
 
+    servoPub.publish(servoMsg);
+
+    servoMsg.channel = 2
+    servoMsg.angle = servoAngles[1]
+
+    servoPub.publish(servoMsg);
+
+    servoMsg.channel = 3
+    servoMsg.angle = servoAngles[2]
+
+    servoPub.publish(servoMsg);
+}
+
+window.onload = function () {
+
+    initROS();
     initSliders();
-    initVelocityPublisher();
     initTeleopKeyboard();
     createJoystick();
 
+    firmwareVerClient.callService(new ROSLIB.ServiceRequest(), function(result) {
+        $('#firmware-ver').text(result.firmware_ver);
+    });
+
     setInterval(() => publishTwist(), 50);
+
+    setInterval(() => publishServos(), 50);
+
+    setInterval(function() {
+        batteryClient.callService(new ROSLIB.ServiceRequest(), function(result) {
+            $('#battery-voltage').text(result.battery.toFixed(2).toString() + "V");
+        });
+    }, 1000);
 
 }
