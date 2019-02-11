@@ -8,6 +8,7 @@ var batteryClient;
 var cmdVelPub;
 var servoPub;
 var servoAngles;
+var stream;
 
 function initROS() {
 
@@ -130,6 +131,7 @@ function initSliders() {
     });
     $('#lin-slider').on("slide", function(slideEvt) {
         speedLinear = slideEvt.value;
+        console.log(speedLinear);
     });
     speedLinear = 0.2
 
@@ -226,4 +228,7 @@ window.onload = function () {
         });
     }, 1000);
 
+    stream = new Stream();
+    window.onbeforeunload = () => stream.stop();
+    stream.start();
 }
