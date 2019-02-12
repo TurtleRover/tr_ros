@@ -9,6 +9,8 @@ var cmdVelPub;
 var servoPub;
 var servoAngles;
 var stream;
+var twistIntervalID;
+var servoIntervalID;
 
 function initROS() {
 
@@ -207,6 +209,15 @@ function publishServos() {
     servoPub.publish(servoMsg);
 }
 
+function shutdown() {
+    clearInterval(twistIntervalID);
+    clearInterval(servoIntervalID);
+    cmdVelPub.unadvertise();
+    servoPub.unadvertise();
+    ros.close();
+    stream.stop();
+}
+
 window.onload = function () {
 
     initROS();
@@ -218,9 +229,9 @@ window.onload = function () {
         $('#firmware-ver').text(result.firmware_ver);
     });
 
-    setInterval(() => publishTwist(), 50);
+    twistIntervalID = setInterval(() => publishTwist(), 50);
 
-    setInterval(() => publishServos(), 50);
+    servoIntervalID = setInterval(() => publishServos(), 50);
 
     setInterval(function() {
         batteryClient.callService(new ROSLIB.ServiceRequest(), function(result) {
@@ -229,6 +240,7 @@ window.onload = function () {
     }, 1000);
 
     stream = new Stream();
-    window.onbeforeunload = () => stream.stop();
     stream.start();
+
+    window.addEventListener("beforeunload", () => shutdown());
 }

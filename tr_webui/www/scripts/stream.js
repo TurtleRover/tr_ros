@@ -54,8 +54,10 @@ Stream.prototype.createPeerConnection = function() {
     this.peerConnection.ontrack = (event) => {
         console.log("[stream] remote stream added:", event.streams[0]);
         let remoteVideoElement = document.getElementById('stream');
-        remoteVideoElement.srcObject = event.streams[0];
-        remoteVideoElement.play();
+        if(remoteVideoElement.paused) {
+            remoteVideoElement.srcObject = event.streams[0];
+            remoteVideoElement.play();
+        }
     }
 
     this.peerConnection.onremovestream = () => console.log('[stream] remove');
@@ -75,7 +77,7 @@ Stream.prototype.offer = function() {
         }
     };
     this.websocket.send(JSON.stringify(command));
-    console.log("[stream] offer(), command=" + JSON.stringify(command));
+    console.debug("[stream] offer(), command=" + JSON.stringify(command));
 }
 
 Stream.prototype.open = function() {
@@ -88,7 +90,7 @@ Stream.prototype.addIceCandidates = function () {
     this.iceCandidates.forEach((candidate) => {
         this.peerConnection.addIceCandidate(candidate,
             function() {
-                console.log("[stream] IceCandidate added: " + JSON.stringify(candidate));
+                console.debug("[stream] IceCandidate added: " + JSON.stringify(candidate));
             },
             function(error) {
                 console.error("[stream] addIceCandidate error: " + error);
@@ -103,7 +105,7 @@ Stream.prototype.message = function(event) {
     var msg = JSON.parse(event.data);
     var what = msg.what;
     var data = msg.data;
-    console.log("[stream] message =" + what);
+    console.debug("[stream] message =" + what);
 
     switch (what) {
         case "offer":
@@ -158,7 +160,7 @@ Stream.prototype.message = function(event) {
 
 
 Stream.prototype._onRemoteSdpSuccess = function() {
-    console.log('[stream] onRemoteSdpSucces()');
+    console.debug('[stream] onRemoteSdpSucces()');
     this.remoteDesc = true;
     this.peerConnection.createAnswer((sessionDescription) => {
             this.peerConnection.setLocalDescription(sessionDescription);
@@ -166,7 +168,7 @@ Stream.prototype._onRemoteSdpSuccess = function() {
                 what: "answer",
                 data: JSON.stringify(sessionDescription)
             });
-            console.log('[stream] sdp success', request);
+            console.debug('[stream] sdp success', request);
 
             this.websocket.send(request);
 
