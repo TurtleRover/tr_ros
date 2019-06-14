@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 import rospy
-from tr_hat_msgs.msg import MotorPower, ServoAngle
+from std_msgs.msg import Float32, Float32MultiArray
 from tr_hat_msgs.srv import (GetBattery, GetBatteryResponse,
                              GetFirmwareVer, GetFirmwareVerResponse)
 
@@ -10,6 +10,7 @@ from threading import Lock
 
 import frame
 from serial_comm import SerialComm
+from utils import power_to_motor_payload, servo_angle_to_duty
 
 
 class Bridge():
@@ -24,14 +25,26 @@ class Bridge():
 
         self.motor_sub = rospy.Subscriber(
             "~motors",
-            MotorPower,
+            Float32MultiArray,
             self.set_motors
         )
 
-        self.servo_sub = rospy.Subscriber(
-            "~servo",
-            ServoAngle,
-            self.set_servo
+        self.servo1_sub = rospy.Subscriber(
+            "~servo1/angle",
+            Float32,
+            self.get_servo_callback(1)
+        )
+
+        self.servo2_sub = rospy.Subscriber(
+            "~servo2/angle",
+            Float32,
+            self.get_servo_callback(2)
+        )
+
+        self.servo3_sub = rospy.Subscriber(
+            "~servo3/angle",
+            Float32,
+            self.get_servo_callback(3)
         )
 
         self.battery_srv = rospy.Service(
@@ -46,33 +59,17 @@ class Bridge():
             self.get_firmware_ver
         )
 
-    def set_motors(self, data):
-        payload = []
-        for p in data.power:
-            p = max(min(p, 1.0), -1.0)
-            value = int(round(p * 0x7F))
-            if value < 0:
-                value = -value + 0x7F
-            payload.append(value)
-
-        with self.lock:
-            self.comm.serial.flushInput()
-            f = frame.motors(payload)
-            self.comm.send(f)
-            status = self.comm.readline()
-
-        if not status or not status == " OK \r\n":
-            rospy.logerr("Did not receive a valid response after motor command")
-
-    def set_servo(self, data):
-        if data.channel not in [1,2,3]:
-            rospy.logerr(("Wrong servo channel! Received {0}, "
-                          "expected 1, 2 or 3".format(data.channel)))
+    def set_motors(self, msg):
+        if len(msg.data) < 4:
+            rospy.logerr("Wrong array size in motor command")
             return
 
-        value = int((data.angle / 180.0) * 3450 + 1300)
-        duty = struct.pack(">H", value)
-        f = frame.servo(data.channel, duty)
+        payload = []
+        for p in msg.data:
+            value = power_to_motor_payload(p)
+            payload.append(value)
+
+        f = frame.motors(payload)
 
         with self.lock:
             self.comm.serial.flushInput()
@@ -80,16 +77,33 @@ class Bridge():
             status = self.comm.readline()
 
         if not status or not status == " OK \r\n":
-            rospy.logerr("Did not receive a valid response after servo command")
+            rospy.logerr("Did not receive a valid response after a motor command")
+
+    def get_servo_callback(self, channel):
+        def set_servo(msg):
+            angle = msg.data
+            duty = servo_angle_to_duty(angle)
+
+            f = frame.servo(channel, duty)
+
+            with self.lock:
+                self.comm.serial.flushInput()
+                self.comm.send(f)
+                status = self.comm.readline()
+
+            if not status or not status == " OK \r\n":
+                rospy.logerr("Did not receive a valid response after servo command")
+
+        return set_servo
 
     def get_battery(self, data):
         with self.lock:
             self.comm.serial.flushInput()
             self.comm.send(frame.battery())
-            #status = self.comm.readline()
+            # status = self.comm.readline()
             status = self.comm.serial.read(4)
 
-        if not status:  #or not status.endswith("\r\n"):
+        if not status:  # or not status.endswith("\r\n"):
             success = False
             rospy.logerr("Could not get battery status")
             battery_status = 0

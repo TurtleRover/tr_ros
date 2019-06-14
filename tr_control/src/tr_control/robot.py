@@ -1,7 +1,7 @@
 import rospy
-from geometry_msgs.msg import Twist, TwistStamped
 
-from tr_hat_msgs.msg import MotorPower
+from std_msgs.msg import Float32MultiArray
+from geometry_msgs.msg import Twist, TwistStamped
 
 from driver import DriverStraight, DriverDifferential
 from controller import Controller
@@ -47,7 +47,7 @@ class Robot():
 
         self.motor_pub = rospy.Publisher(
             "tr_hat_bridge/motors",
-            MotorPower,
+            Float32MultiArray,
             queue_size=1
         )
 
@@ -73,4 +73,6 @@ class Robot():
         self.callback_cmd(data.twist)
 
     def publish_motors(self):
-        self.motor_pub.publish(self.controller.power)
+        msg = Float32MultiArray()
+        msg.data = self.controller.power
+        self.motor_pub.publish(msg)
