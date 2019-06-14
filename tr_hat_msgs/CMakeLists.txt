@@ -5,13 +5,6 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
-add_message_files(
-  DIRECTORY msg
-  FILES
-  MotorPower.msg
-  ServoAngle.msg
-)
-
 add_service_files(
   DIRECTORY srv
   FILES
