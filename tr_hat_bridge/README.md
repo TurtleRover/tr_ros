@@ -8,9 +8,13 @@ Exposes ROS API for communication with Turtle Hat
 
 #### Subscribed Topics
 
-* **`~motors`** ([tr_hat_msgs/MotorPower])
+* **`~motors`** ([std_msgs/Float32MultiArray])
 
 	Sets motor power levels described by float values between -1.0 and 1.0
+
+* **`~servoX/angle`** ([std_msgs/Float32])
+
+	Sets servo angle on channel X (1,2 or 3)
 
 #### Services
 
@@ -28,6 +32,7 @@ Exposes ROS API for communication with Turtle Hat
 
 	Serial device connected to Turtle Hat
 
-[tr_hat_msgs/MotorPower]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/msg/MotorPower.msg
+[std_msgs/Float32]: http://docs.ros.org/api/std_msgs/html/msg/Float32.html
+[std_msgs/Float32MultiArray]: http://docs.ros.org/api/std_msgs/html/msg/Float32MultiArray.html
 [tr_hat_msgs/GetBattery]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/srv/GetBattery.srv
 [tr_hat_msgs/GetFirmwareVer]: https://github.com/TurtleRover/tr_ros/blob/master/tr_hat_msgs/srv/GetFirmwareVer.srv
