@@ -1,12 +1,9 @@
-from __future__ import with_statement
-
 import rospy
 from std_msgs.msg import Float32, Float32MultiArray
 from tr_hat_msgs.srv import (GetBattery, GetBatteryResponse,
                              GetFirmwareVer, GetFirmwareVerResponse)
 
 import struct
-from threading import Lock
 
 import frame
 from serial_comm import SerialComm
@@ -20,8 +17,6 @@ class Bridge():
 
         self.comm = SerialComm(serial_device)
         self.comm.connect()
-
-        self.lock = Lock()
 
         self.motor_sub = rospy.Subscriber(
             "~motors",
@@ -70,11 +65,7 @@ class Bridge():
             payload.append(value)
 
         f = frame.motors(payload)
-
-        with self.lock:
-            self.comm.serial.flushInput()
-            self.comm.send(f)
-            status = self.comm.readline()
+        status = self.comm.proccess_command(f)
 
         if not status or not status == " OK \r\n":
             rospy.logerr("Did not receive a valid response after a motor command")
@@ -85,11 +76,7 @@ class Bridge():
             duty = servo_angle_to_duty(angle)
 
             f = frame.servo(channel, duty)
-
-            with self.lock:
-                self.comm.serial.flushInput()
-                self.comm.send(f)
-                status = self.comm.readline()
+            status = self.comm.proccess_command(f)
 
             if not status or not status == " OK \r\n":
                 rospy.logerr("Did not receive a valid response after servo command")
@@ -97,13 +84,9 @@ class Bridge():
         return set_servo
 
     def get_battery(self, data):
-        with self.lock:
-            self.comm.serial.flushInput()
-            self.comm.send(frame.battery())
-            # status = self.comm.readline()
-            status = self.comm.serial.read(4)
+        status = self.comm.proccess_command(frame.battery())
 
-        if not status:  # or not status.endswith("\r\n"):
+        if not status or not status.endswith("\r\n"):
             success = False
             rospy.logerr("Could not get battery status")
             battery_status = 0
@@ -114,10 +97,7 @@ class Bridge():
         return GetBatteryResponse(success, battery_status)
 
     def get_firmware_ver(self, data):
-        with self.lock:
-            self.comm.serial.flushInput()
-            self.comm.send(frame.firmware_ver())
-            firmware_ver = self.comm.readline()
+        firmware_ver = self.comm.proccess_command(frame.firmware_ver())
 
         if not firmware_ver or not firmware_ver.endswith("\r\n"):
             success = False
