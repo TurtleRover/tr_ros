@@ -1,0 +1,9 @@
+<launch>
+
+    <node name="tr_hat_bridge" pkg="tr_hat_bridge" type="tr_hat_bridge"/>
+
+    <node name="tr_control" pkg="tr_control" type="tr_control"/>
+
+    <include file="$(find tr_webui)/launch/webui.launch"/>
+
+</launch>
