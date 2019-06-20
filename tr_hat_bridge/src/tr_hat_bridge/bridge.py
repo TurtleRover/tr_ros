@@ -1,9 +1,8 @@
 import rospy
-from std_msgs.msg import Float32, Float32MultiArray
-from tr_hat_msgs.srv import (GetBattery, GetBatteryResponse,
-                             GetFirmwareVer, GetFirmwareVerResponse)
+from std_msgs.msg import Float32, Float32MultiArray, String
 
 import struct
+from threading import Thread
 
 import frame
 from serial_comm import SerialComm
@@ -13,9 +12,10 @@ from utils import power_to_motor_payload, servo_angle_to_duty
 class Bridge():
     def __init__(self):
 
-        serial_device = rospy.get_param("~device", "/dev/ttyAMA0")
+        self.serial_device = rospy.get_param("~device", "/dev/ttyAMA0")
+        self.battery_pub_rate = rospy.get_param("~battery_pub_rate", 1.0)
 
-        self.comm = SerialComm(serial_device)
+        self.comm = SerialComm(self.serial_device)
         self.comm.connect()
 
         self.motor_sub = rospy.Subscriber(
@@ -42,17 +42,24 @@ class Bridge():
             self.get_servo_callback(3)
         )
 
-        self.battery_srv = rospy.Service(
-            "~get_battery",
-            GetBattery,
-            self.get_battery
+        self.firmware_ver_pub = rospy.Publisher(
+            "~firmware_version",
+            String,
+            latch=True,
+            queue_size=1
         )
 
-        self.firmware_ver_srv = rospy.Service(
-            "~get_firmware_ver",
-            GetFirmwareVer,
-            self.get_firmware_ver
+        self.battery_pub = rospy.Publisher(
+            "~battery",
+            Float32,
+            queue_size=1
         )
+
+        self.publish_firmware_ver()
+
+        self.publish_battery_thread = Thread(target=self.publish_battery_loop)
+        self.publish_battery_thread.daemon = True
+        self.publish_battery_thread.start()
 
     def set_motors(self, msg):
         if len(msg.data) < 4:
@@ -83,27 +90,26 @@ class Bridge():
 
         return set_servo
 
-    def get_battery(self, data):
-        status = self.comm.proccess_command(frame.battery())
-
-        if not status or not status.endswith("\r\n"):
-            success = False
-            rospy.logerr("Could not get battery status")
-            battery_status = 0
-        else:
-            success = True
-            battery_status = struct.unpack("<f", status[:4])[0]
-
-        return GetBatteryResponse(success, battery_status)
-
-    def get_firmware_ver(self, data):
+    def publish_firmware_ver(self):
         firmware_ver = self.comm.proccess_command(frame.firmware_ver())
 
         if not firmware_ver or not firmware_ver.endswith("\r\n"):
-            success = False
             rospy.logerr("Could not get firmware version")
         else:
-            success = True
             firmware_ver = firmware_ver[:-2]
+            self.firmware_ver_pub.publish(firmware_ver)
 
-        return GetFirmwareVerResponse(success, firmware_ver)
+    def publish_battery(self):
+        status = self.comm.proccess_command(frame.battery())
+
+        if not status or not status.endswith("\r\n"):
+            rospy.logerr("Could not get battery status")
+        else:
+            battery_status = struct.unpack("<f", status[:4])[0]
+            self.battery_pub.publish(battery_status)
+
+    def publish_battery_loop(self):
+        rate = rospy.Rate(self.battery_pub_rate)
+        while not rospy.is_shutdown():
+            self.publish_battery()
+            rate.sleep()

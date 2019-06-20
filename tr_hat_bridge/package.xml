@@ -10,8 +10,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <exec_depend>tr_hat_msgs</exec_depend>
-
   <exec_depend>python-serial</exec_depend>
 
 </package>
