@@ -6,7 +6,7 @@ from threading import Thread
 
 import frame
 from serial_comm import SerialComm
-from utils import power_to_motor_payload, servo_angle_to_duty
+from utils import power_to_motor_payload, servo_angle_to_duty, reset_STM
 
 
 class Bridge():
@@ -16,6 +16,7 @@ class Bridge():
         self.battery_pub_rate = rospy.get_param("~battery_pub_rate", 1.0)
 
         self.comm = SerialComm(self.serial_device)
+        reset_STM()
         self.comm.connect()
 
         self.motor_sub = rospy.Subscriber(
