@@ -20,10 +20,10 @@ function initROS() {
         url: "ws://" + robot_hostname + ":9090"
     });
 
-    firmwareVerClient = new ROSLIB.Service({
+    firmwareVerClient = new ROSLIB.Topic({
         ros: ros,
-        name: '/tr_hat_bridge/get_firmware_ver',
-        serviceType: 'tr_hat_msgs/GetFirmwareVer'
+        name: '/tr_hat_bridge/firmware_version',
+        messageType: 'std_msgs/String'
     });
 
 
@@ -226,8 +226,9 @@ window.onload = function () {
     initTeleopKeyboard();
     createJoystick();
 
-    firmwareVerClient.callService(new ROSLIB.ServiceRequest(), function(result) {
-        $('#firmware-ver').text(result.firmware_ver);
+
+    firmwareVerClient.subscribe((message) => {
+        $('#firmware-ver').text(message.data);
     });
 
     twistIntervalID = setInterval(() => publishTwist(), 50);
