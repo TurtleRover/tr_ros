@@ -26,10 +26,11 @@ function initROS() {
         serviceType: 'tr_hat_msgs/GetFirmwareVer'
     });
 
-    batteryClient = new ROSLIB.Service({
+
+    batteryClient = new ROSLIB.Topic({
         ros: ros,
-        name: '/tr_hat_bridge/get_battery',
-        serviceType: 'tr_hat_msgs/GetBattery'
+        name: '/tr_hat_bridge/battery',
+        messageType: 'std_msgs/Float32'
     });
 
     // Init message with zero values.
@@ -57,7 +58,7 @@ function initROS() {
     servoPub = new ROSLIB.Topic({
         ros: ros,
         name: '/tr_hat_bridge/servo',
-        messageType: 'tr_hat_msgs/ServoAngle'
+        messageType: 'std_msgs/Float32MultiArray'
     });
 
     servoPub.advertise();
@@ -231,13 +232,9 @@ window.onload = function () {
 
     twistIntervalID = setInterval(() => publishTwist(), 50);
 
-    servoIntervalID = setInterval(() => publishServos(), 50);
-
-    setInterval(function() {
-        batteryClient.callService(new ROSLIB.ServiceRequest(), function(result) {
-            $('#battery-voltage').text(result.battery.toFixed(2).toString() + "V");
-        });
-    }, 1000);
+    batteryClient.subscribe((message) => {
+        $('#battery-voltage').text(message.data.toFixed(2).toString() + "V");
+    });
 
     stream = new Stream();
     stream.start();
