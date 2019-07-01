@@ -7,4 +7,7 @@
         <arg name="port" value="8085"/>
         <arg name="cached" value="false"/>
     </include>
+
+    <node pkg="tr_control" type="tr_control" name="tr_control" />
+
 </launch>
