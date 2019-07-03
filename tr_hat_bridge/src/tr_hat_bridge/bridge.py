@@ -1,5 +1,5 @@
 import rospy
-from std_msgs.msg import Float32, Int32, Float32MultiArray, String
+from std_msgs.msg import Float32, Int16, Float32MultiArray, String
 
 import struct
 from threading import Thread
@@ -27,19 +27,19 @@ class Bridge():
 
         self.servo1_sub = rospy.Subscriber(
             "servo1/angle",
-            Int32,
+            Int16,
             self.get_servo_callback(1)
         )
 
         self.servo2_sub = rospy.Subscriber(
             "servo2/angle",
-            Int32,
+            Int16,
             self.get_servo_callback(2)
         )
 
         self.servo3_sub = rospy.Subscriber(
             "servo3/angle",
-            Int32,
+            Int16,
             self.get_servo_callback(3)
         )
 
