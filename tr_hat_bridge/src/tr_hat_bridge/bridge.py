@@ -1,5 +1,5 @@
 import rospy
-from std_msgs.msg import Float32, Float32MultiArray, String
+from std_msgs.msg import Float32, Int32, Float32MultiArray, String
 
 import struct
 from threading import Thread
@@ -26,20 +26,20 @@ class Bridge():
         )
 
         self.servo1_sub = rospy.Subscriber(
-            "~servo1/angle",
-            Float32,
+            "servo1/angle",
+            Int32,
             self.get_servo_callback(1)
         )
 
         self.servo2_sub = rospy.Subscriber(
-            "~servo2/angle",
-            Float32,
+            "servo2/angle",
+            Int32,
             self.get_servo_callback(2)
         )
 
         self.servo3_sub = rospy.Subscriber(
-            "~servo3/angle",
-            Float32,
+            "servo3/angle",
+            Int32,
             self.get_servo_callback(3)
         )
 
@@ -51,7 +51,7 @@ class Bridge():
         )
 
         self.battery_pub = rospy.Publisher(
-            "~battery",
+            "battery",
             Float32,
             queue_size=1
         )

@@ -18,7 +18,7 @@ def power_to_motor_payload(power):
 
 
 def servo_angle_to_duty(angle):
-    value = int((angle / 180.0) * 3450 + 1300)
+    value = int((float(angle) / 180.0) * 3450 + 1300)
     duty = struct.pack(">H", value)
     return duty
 
