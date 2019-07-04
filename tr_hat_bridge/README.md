@@ -32,7 +32,7 @@ Exposes ROS API for communication with Turtle Hat
 
 	Serial device connected to Turtle Hat
 
-* **`~battery_pub_rate`** (`int`, default: `1`)
+* **`~battery_pub_rate`** (`float`, default: `1.0`)
 
 	The frequency in Hz at which battery voltage is published 
 
