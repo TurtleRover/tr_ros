@@ -17,10 +17,11 @@ def power_to_motor_payload(power):
     return value
 
 
-def servo_angle_to_duty(angle):
-    value = int((float(angle) / 180.0) * 3450 + 1300)
-    duty = struct.pack(">H", value)
-    return duty
+def servo_angle_to_duty(angle, min_angle, max_angle, min_duty, max_duty):
+    angle = clamp(angle, min_angle, max_angle)
+    value = float(angle - min_angle) / float(max_angle - min_angle)
+    duty = min_duty + int(value * float(max_duty - min_duty))
+    return struct.pack(">H", duty)
 
 
 def reset_STM():

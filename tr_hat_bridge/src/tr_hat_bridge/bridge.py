@@ -15,6 +15,21 @@ class Bridge():
         self.serial_device = rospy.get_param("~device", "/dev/ttyAMA0")
         self.battery_pub_rate = rospy.get_param("~battery_pub_rate", 1.0)
 
+        servo1_min_angle = rospy.get_param("~servo1_min_angle", -90)
+        servo1_max_angle = rospy.get_param("~servo1_max_angle", 90)
+        servo1_min_duty = rospy.get_param("~servo1_min_duty", 2400)
+        servo1_max_duty = rospy.get_param("~servo1_max_duty", 4800)
+
+        servo2_min_angle = rospy.get_param("~servo2_min_angle", -90)
+        servo2_max_angle = rospy.get_param("~servo2_max_angle", 90)
+        servo2_min_duty = rospy.get_param("~servo2_min_duty", 2400)
+        servo2_max_duty = rospy.get_param("~servo2_max_duty", 4800)
+
+        servo3_min_angle = rospy.get_param("~servo3_min_angle", -90)
+        servo3_max_angle = rospy.get_param("~servo3_max_angle", 90)
+        servo3_min_duty = rospy.get_param("~servo3_min_duty", 2400)
+        servo3_max_duty = rospy.get_param("~servo3_max_duty", 4800)
+
         self.comm = SerialComm(self.serial_device)
         reset_STM()
         self.comm.connect()
@@ -28,19 +43,37 @@ class Bridge():
         self.servo1_sub = rospy.Subscriber(
             "servo1/angle",
             Int16,
-            self.get_servo_callback(1)
+            self.get_servo_callback(
+                1,
+                servo1_min_angle,
+                servo1_max_angle,
+                servo1_min_duty,
+                servo1_max_duty
+            )
         )
 
         self.servo2_sub = rospy.Subscriber(
             "servo2/angle",
             Int16,
-            self.get_servo_callback(2)
+            self.get_servo_callback(
+                2,
+                servo2_min_angle,
+                servo2_max_angle,
+                servo2_min_duty,
+                servo2_max_duty
+            )
         )
 
         self.servo3_sub = rospy.Subscriber(
             "servo3/angle",
             Int16,
-            self.get_servo_callback(3)
+            self.get_servo_callback(
+                3,
+                servo3_min_angle,
+                servo3_max_angle,
+                servo3_min_duty,
+                servo3_max_duty
+            )
         )
 
         self.firmware_ver_pub = rospy.Publisher(
@@ -78,10 +111,10 @@ class Bridge():
         if not status or not status == " OK \r\n":
             rospy.logerr("Did not receive a valid response after a motor command")
 
-    def get_servo_callback(self, channel):
+    def get_servo_callback(self, channel, min_angle, max_angle, min_duty, max_duty):
         def set_servo(msg):
             angle = msg.data
-            duty = servo_angle_to_duty(angle)
+            duty = servo_angle_to_duty(angle, min_angle, max_angle, min_duty, max_duty)
 
             f = frame.servo(channel, duty)
             status = self.comm.proccess_command(f)

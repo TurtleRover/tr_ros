@@ -1,6 +1,8 @@
 <launch>
 
-    <node name="tr_hat_bridge" pkg="tr_hat_bridge" type="tr_hat_bridge"/>
+    <node name="tr_hat_bridge" pkg="tr_hat_bridge" type="tr_hat_bridge">
+        <rosparam command="load" file="$(find tr_bringup)/config/servos.yaml" />
+    </node>
 
     <node name="tr_control" pkg="tr_control" type="tr_control"/>
 
