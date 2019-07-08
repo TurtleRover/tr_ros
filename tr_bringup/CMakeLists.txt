@@ -5,6 +5,8 @@ find_package(catkin REQUIRED)
 
 catkin_package()
 
-install(DIRECTORY launch/
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-    PATTERN ".svn" EXCLUDE)
+install(DIRECTORY
+  launch
+  config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
