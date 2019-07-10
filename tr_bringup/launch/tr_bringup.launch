@@ -6,6 +6,8 @@
 
     <node name="tr_control" pkg="tr_control" type="tr_control"/>
 
+    <node name="tr_system" pkg="tr_bringup" type="tr_system"/>
+
     <node name="gscam" pkg="gscam" type="gscam">
         <param name="camera_name" value="camera"/>
         <param name="gscam_config" value="v4l2src do-timestamp=true is-live=true ! image/jpeg, width=800, heiht=600 ! videorate ! image/jpeg, framerate=15/1 ! jpegparse"/>
